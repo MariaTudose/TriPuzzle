@@ -8,35 +8,27 @@ class Piece(targetPos: (Int, Int), var currentPos: (Double, Double)) {
     // a: left side, b: up or down side, c: right side
     var a = ""
     var b = ""
-    var c = "" 
+    var c = ""
+    var pieces = Array(a, b, c)
     var rotation = 0
     var orientation = 0
 
     // orientation: 0 = down, 1 = up
     if (targetPos._1 % 2 == 0 && targetPos._2 % 2 != 0) orientation = 1
     else if (targetPos._1 % 2 != 0 && targetPos._2 % 2 == 0) orientation = 1
-    
+
     def setSides(a: String, b: String, c: String) = {
         this.a = a
         this.b = b
         this.c = c
+        pieces = Array(a, b, c)
     }
 
     def equals(another: Piece): Boolean = {
-        for (i <- 0 to 3) {
-            if (this.toString() == another.toString()) {
-                return true
-            }
-            this.rotate()
+        for (i <- 0 until 3) {
+            if(this.pieces(i) == another.pieces(0) && this.pieces((i + 1)%3) == another.pieces(1) && this.pieces((i + 2)%3) == another.pieces(2)) return true
         }
         false
-    }
-
-    def rotate() = {
-        var temp = a
-        a = b
-        b = c
-        c = temp
     }
 
     def getSides(board: Board, i: Int, pieceMap: Map[(Int, Int), Piece]) = {
@@ -46,21 +38,21 @@ class Piece(targetPos: (Int, Int), var currentPos: (Double, Double)) {
         var aSide = board.pattern(r.nextInt(6))
         var bSide = board.pattern(r.nextInt(6))
         var cSide = board.pattern(r.nextInt(6))
-        
+
         var deltaY = 0
 
         if (orientation == 1) deltaY = 1 else deltaY = -1
 
         if (pieceMap.keySet.exists(_ == (x - 1, y))) {
-            aSide = board.patternMap(pieceMap(x-1, y).c)
+            aSide = board.patternMap(pieceMap(x - 1, y).c)
         }
         if (pieceMap.keySet.exists(_ == (x + 1, y))) {
-            cSide = board.patternMap(pieceMap(x+1, y).a)
+            cSide = board.patternMap(pieceMap(x + 1, y).a)
         }
         if (pieceMap.keySet.exists(_ == (x, y + deltaY))) {
-            bSide = board.patternMap(pieceMap(x, y+deltaY).b)
+            bSide = board.patternMap(pieceMap(x, y + deltaY).b)
         }
-        
+
         this.setSides(aSide, bSide, cSide)
     }
 

@@ -121,14 +121,20 @@ object TriPuzzle extends JFXApp {
     def createPieces(board: Board): Map[(Int, Int), Piece] = {
         val r = new Random
         var pieceMap = Map[(Int, Int), Piece]()
+        var pieceUnique = false
 
         for (i <- board.order) {
-            val piece = new Piece(board.coords(i), (r.nextInt(220) + 300, r.nextInt(320)))
-            piece.getSides(board, i, pieceMap)
-            pieceMap(board.coords(i)) = piece
-
-            println(piece)
-            println(board.coords(i))
+            pieceUnique = false
+            while (!pieceUnique) {
+                val piece = new Piece(board.coords(i), (r.nextInt(220) + 300, r.nextInt(320)))
+                piece.getSides(board, i, pieceMap)
+                if(pieceMap.forall(!_._2.equals(piece))) {
+                    pieceMap(board.coords(i)) = piece
+                    pieceUnique = true
+                }
+                //println(piece)
+                //println(board.coords(i))
+            }
 
         }
         return pieceMap

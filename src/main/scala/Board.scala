@@ -14,6 +14,6 @@ class Board() {
             coords.append((i,j))
         }
     }
-    println(coords.mkString)
+    //println(coords.mkString)
     
 }

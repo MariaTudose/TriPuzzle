@@ -4,16 +4,18 @@ import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.scene.Scene
 import scalafx.scene.layout.Pane
-import scalafx.scene.text.Text
 import scalafx.scene.shape.Polygon
 import scalafx.scene.paint.Color
 import scalafx.scene.canvas.Canvas
 import scalafx.scene.layout.StackPane
 import scalafx.scene.Group
+import scalafx.scene.control.Label
+import scalafx.scene.text.Font
 import javafx.event.EventHandler
-import javafx.scene.input.MouseEvent
+import javafx.scene.input._
 import scala.util.Random
 import scala.collection.mutable.Map
+import scala.collection.mutable.ArrayBuffer
 
 object TriPuzzle extends JFXApp {
     stage = new JFXApp.PrimaryStage {
@@ -21,7 +23,8 @@ object TriPuzzle extends JFXApp {
         width = 600
         height = 400
         scene = new Scene {
-            fill = Color.AliceBlue
+            val bg = new Color(240, 240, 216)
+            fill = bg
             content = new Pane {
                 val canvas = new Canvas(600, 400);
                 children.add(canvas)
@@ -29,64 +32,76 @@ object TriPuzzle extends JFXApp {
 
                 //260, 300
 
+                val pieceColor = new Color(192, 216, 96)
+                val pieceBorder = new Color(96, 120, 72)
+                val gridColor = new Color(96, 72, 72)
+
                 val xpoints = Array(75.0, 225.0, 300.0, 225.0, 75.0, 0.0)
                 val ypoints = Array(50.0, 50.0, 180.0, 310.0, 310.0, 180.0)
-
-                gc.strokePolygon(xpoints, ypoints, 6)
-
-                gc.strokeLine(75, 50, 225, 310)
-                gc.strokeLine(225, 50, 75, 310)
-
-                gc.strokeLine(0, 180, 300, 180)
-                gc.strokeLine(37.5, 115, 262.5, 115)
-                gc.strokeLine(37.5, 245, 262.5, 245)
-
-                gc.strokeLine(150, 50, 37.5, 245)
-                gc.strokeLine(150, 50, 262.5, 245)
-
-                gc.strokeLine(37.5, 115, 150, 310)
-                gc.strokeLine(262.5, 115, 150, 310)
 
                 val board = new Board
                 val pieceMap = createPieces(board)
 
+                var boardPolygons = new ArrayBuffer[(Polygon, (Int, Int), Int)]()
+                var trianglePieces = new ArrayBuffer[(Group, Piece)]()
+
                 for ((key, piece) <- pieceMap) {
-                    //val x = piece.currentPos._1
-                    //val y = piece.currentPos._2
+                    val x = piece.currentCoord._1
+                    val y = piece.currentCoord._2
 
-                    val x = key._1 * 37.5
-                    val y = key._2 * 65 + 50
+                    val xBoard = key._1 * 37.5
+                    val yBoard = key._2 * 65 + 50
 
-                    val polygon = new Polygon
-                    polygon.setFill(Color.Gray)
-                    polygon.setStroke(Color.Crimson)
+                    val triangleBoard = new Polygon
+                    boardPolygons.append((triangleBoard, key, piece.orientation))
+                    triangleBoard.setStroke(gridColor)
+                    triangleBoard.setFill(bg)
+
+                    val trianglePiece = new Polygon
+                    trianglePiece.setFill(pieceColor)
+                    trianglePiece.setStroke(pieceBorder)
+                    trianglePiece.setStrokeWidth(2)
 
                     val labelA = new scalafx.scene.control.Label(piece.a)
-                    labelA.layoutX = x + 20
+                    labelA.layoutX = x + 22
                     labelA.layoutY = y + 25
 
                     val labelC = new scalafx.scene.control.Label(piece.c)
-                    labelC.layoutX = x + 45
+                    labelC.layoutX = x + 44
                     labelC.layoutY = y + 25
 
                     val labelB = new scalafx.scene.control.Label(piece.b)
                     labelB.layoutX = x + 33
 
                     if (piece.orientation == 1) {
-                        polygon.getPoints.addAll(x, y + 65.0, x + 37.5, y, x + 75.0, y + 65.0)
+                        trianglePiece.getPoints.addAll(x, y + 65.0, x + 37.5, y, x + 75.0, y + 65.0)
+                        triangleBoard.getPoints.addAll(xBoard, yBoard + 65.0, xBoard + 37.5, yBoard, xBoard + 75.0, yBoard + 65.0)
                         labelB.layoutY = y + 50
                     } else {
-                        polygon.getPoints.addAll(x, y, x + 75, y, x + 37.5, y + 65.0)
+                        trianglePiece.getPoints.addAll(x, y, x + 75, y, x + 37.5, y + 65.0)
+                        triangleBoard.getPoints.addAll(xBoard, yBoard, xBoard + 75, yBoard, xBoard + 37.5, yBoard + 65.0)
                         labelB.layoutY = y
                     }
 
-                    val g = new Group(polygon, labelA, labelB, labelC)
+                    val g = new Group(trianglePiece, labelA, labelB, labelC)
+                    trianglePieces.append((g, piece))
+
+                    g.onMouseClicked = new EventHandler[MouseEvent] {
+                        def handle(event: MouseEvent) {
+                            if (event.getButton == MouseButton.SECONDARY) {
+                                val temp = labelA.getText
+                                labelA.text = labelB.getText
+                                labelB.text = labelC.getText
+                                labelC.text = temp
+                            }
+                        }
+                    }
 
                     var mousePosition = (0.0, 0.0)
-
                     g.onMousePressed = new EventHandler[MouseEvent] {
                         def handle(event: MouseEvent) {
                             mousePosition = (event.getSceneX, event.getSceneY)
+                            g.toFront()
                         }
                     }
 
@@ -94,23 +109,40 @@ object TriPuzzle extends JFXApp {
                         def handle(event: MouseEvent) {
                             val deltaX = event.getSceneX - mousePosition._1
                             val deltaY = event.getSceneY - mousePosition._2
-                            piece.setPos(event.getSceneX, event.getSceneY)
-                            //println(event.getSceneX)
-                            //println(event.getSceneY)
                             g.setLayoutX(g.getLayoutX + deltaX)
                             g.setLayoutY(g.getLayoutY + deltaY)
                             mousePosition = (event.getSceneX, event.getSceneY)
                         }
                     }
 
-                    children.add(g)
+                    children.addAll(g, triangleBoard)
 
-                    gc.setStroke(Color.Crimson)
-                    gc.setFill(Color.Gray)
+                }
 
-                    //gc.strokePolygon(xpos, ypos, 3)
-                    //gc.fillPolygon(xpos, ypos, 3)
+                for ((group, piece) <- this.trianglePieces) {
+                    group.onMouseReleased = new EventHandler[MouseEvent] {
+                        def handle(event: MouseEvent) {
+                            val mouseX = event.getSceneX
+                            val mouseY = event.getSceneY
+                            for ((boardPiece, key, boardOrientation) <- boardPolygons) {
+                                if (boardPiece.contains(mouseX, mouseY)) {
 
+                                    val pieceX = group.localToScene(group.getBoundsInLocal).minX
+                                    val pieceY = group.localToScene(group.getBoundsInLocal).maxY                       
+
+                                    if (piece.orientation == 1 && boardOrientation == 1) {
+                                        group.setLayoutX(group.getLayoutX + (boardPiece.points(0) - pieceX - 2))
+                                        group.setLayoutY(group.getLayoutY + (boardPiece.points(1) - pieceY + 2))
+                                        piece.setPos(key)
+                                    } else if (piece.orientation == 0 && boardOrientation == 0) {
+                                        group.setLayoutX(group.getLayoutX + (boardPiece.points(0) - pieceX - 2))
+                                        group.setLayoutY(group.getLayoutY + (boardPiece.points(1) - pieceY + 2 + 65))
+                                        piece.setPos(key)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
             }
@@ -126,14 +158,12 @@ object TriPuzzle extends JFXApp {
         for (i <- board.order) {
             pieceUnique = false
             while (!pieceUnique) {
-                val piece = new Piece(board.coords(i), (r.nextInt(220) + 300, r.nextInt(320)))
-                piece.getSides(board, i, pieceMap)
-                if(pieceMap.forall(!_._2.equals(piece))) {
+                val piece = new Piece(board.coords(i), (0, 0), (r.nextInt(220) + 300, r.nextInt(320)))
+                piece.createSides(board, i, pieceMap)
+                if (pieceMap.forall(!_._2.equals(piece))) {
                     pieceMap(board.coords(i)) = piece
                     pieceUnique = true
                 }
-                //println(piece)
-                //println(board.coords(i))
             }
 
         }

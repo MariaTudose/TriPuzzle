@@ -3,7 +3,7 @@ package main.scala
 import scala.collection.mutable.Map
 import scala.util.Random
 
-class Piece(targetPos: (Int, Int), var currentPos: (Double, Double)) {
+class Piece(targetPos: (Int, Int), var currentPos: (Int, Int), var currentCoord: (Double, Double)) {
 
     // a: left side, b: up or down side, c: right side
     var a = ""
@@ -31,7 +31,7 @@ class Piece(targetPos: (Int, Int), var currentPos: (Double, Double)) {
         false
     }
 
-    def getSides(board: Board, i: Int, pieceMap: Map[(Int, Int), Piece]) = {
+    def createSides(board: Board, i: Int, pieceMap: Map[(Int, Int), Piece]) = {
         val x = this.targetPos._1
         val y = this.targetPos._2
         val r = new Random
@@ -56,8 +56,8 @@ class Piece(targetPos: (Int, Int), var currentPos: (Double, Double)) {
         this.setSides(aSide, bSide, cSide)
     }
 
-    def setPos(x: Double, y: Double) = {
-        currentPos = (x, y)
+    def setPos(pos: (Int,Int)) = {
+        currentPos = pos
     }
 
     override def toString = a + b + c

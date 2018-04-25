@@ -27,6 +27,13 @@ class Piece(var board: Board, targetPos: (Int, Int), var currentPos: (Int, Int),
         pieces = Array(a, b, c)
     }
 
+    def rotate() = {
+        val temp = a
+        a = b
+        b = c
+        c = temp
+    }
+
     def equals(another: Piece): Boolean = {
         for (i <- 0 until 3) {
             if (this.pieces(i) == another.pieces(0) && this.pieces((i + 1) % 3) == another.pieces(1) && this.pieces((i + 2) % 3) == another.pieces(2)) return true

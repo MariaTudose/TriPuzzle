@@ -122,6 +122,7 @@ object TriPuzzle extends JFXApp {
                         labelA.text = labelB.getText
                         labelB.text = labelC.getText
                         labelC.text = temp
+                        
                     }
                 }
             }

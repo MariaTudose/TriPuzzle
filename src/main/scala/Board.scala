@@ -30,14 +30,13 @@ class Board() {
                 val piece = new Piece(this, this.coords(i), (0, 0), (r.nextInt(220) + 300, r.nextInt(290) + 30))
                 piece.createSides(originalPieceMap, i)
                 if (originalPieceMap.forall(!_._2.equals(piece))) {
+                    for(i <- 0 to r.nextInt(2) + 1) piece.rotate()
                     originalPieceMap(this.coords(i)) = piece
                     pieces.append(piece)
                     pieceUnique = true
                 }
             }
-
         }
-        println(originalPieceMap)
         return originalPieceMap
     }
 
@@ -47,7 +46,6 @@ class Board() {
 
     def checkIfSolved(): Boolean = {
         if (pieceMap.keys.size == 24) {
-            println("All pieces on board!")
             for (((x, y), piece) <- pieceMap) {
                 var aMatch = true
                 var bMatch = true

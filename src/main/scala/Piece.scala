@@ -49,14 +49,14 @@ class Piece(var board: Board, targetPos: (Int, Int), var currentPos: (Int, Int),
         var bSide = board.pattern(r.nextInt(6))
         var cSide = board.pattern(r.nextInt(6))
 
-        if (sideFound(pieceMap, 0, x, y)) aSide = board.patternMap(pieceMap(x - 1, y).c)
-        if (sideFound(pieceMap, 1, x, y)) cSide = board.patternMap(pieceMap(x + 1, y).a)
-        if (sideFound(pieceMap, 2, x, y)) bSide = board.patternMap(pieceMap(x, y + deltaY).b)
+        if (neighborFound(pieceMap, 0, x, y)) aSide = board.patternMap(pieceMap(x - 1, y).c)
+        if (neighborFound(pieceMap, 1, x, y)) cSide = board.patternMap(pieceMap(x + 1, y).a)
+        if (neighborFound(pieceMap, 2, x, y)) bSide = board.patternMap(pieceMap(x, y + deltaY).b)
 
         this.setSides(aSide, bSide, cSide)
     }
 
-    def sideFound(pieceMap: Map[(Int, Int), Piece], dir: Int, x: Int, y: Int): Boolean = {
+    def neighborFound(pieceMap: Map[(Int, Int), Piece], dir: Int, x: Int, y: Int): Boolean = {
         dir match {
             case 0 => return pieceMap.keySet.exists(_ == (x - 1, y))
             case 1 => return pieceMap.keySet.exists(_ == (x + 1, y))

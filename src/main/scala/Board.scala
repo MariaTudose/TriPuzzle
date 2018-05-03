@@ -9,6 +9,7 @@ class Board() {
     var coords = ArrayBuffer[(Int, Int)]()
     var pieceMap = Map[(Int, Int), Piece]()
     var pieces = ArrayBuffer[Piece]()
+    // The order variable tells the best order to traverse the board coordinates for creating pieces 
     val order = Array(9, 10, 11, 18, 17, 16, 15, 14, 7, 8, 1, 2, 3, 4, 5, 12, 13, 20, 19, 26, 25, 24, 23, 22)
     val pattern = Array("a", "b", "c", "A", "B", "C")
     val patternMap = Map("a" -> "A", "b" -> "B", "c" -> "C", "A" -> "a", "B" -> "b", "C" -> "c")
@@ -50,9 +51,9 @@ class Board() {
                 var aMatch = true
                 var bMatch = true
                 var cMatch = true
-                if (piece.sideFound(pieceMap, 0, x, y)) aMatch = piece.a == patternMap(pieceMap(x - 1, y).c)
-                if (piece.sideFound(pieceMap, 1, x, y)) cMatch = piece.c == patternMap(pieceMap(x + 1, y).a)
-                if (piece.sideFound(pieceMap, 2, x, y)) bMatch = piece.b == patternMap(pieceMap(x, y + piece.deltaY).b)
+                if (piece.neighborFound(pieceMap, 0, x, y)) aMatch = piece.a == patternMap(pieceMap(x - 1, y).c)
+                if (piece.neighborFound(pieceMap, 1, x, y)) cMatch = piece.c == patternMap(pieceMap(x + 1, y).a)
+                if (piece.neighborFound(pieceMap, 2, x, y)) bMatch = piece.b == patternMap(pieceMap(x, y + piece.deltaY).b)
                 if (!(aMatch && bMatch && cMatch)) return false
             }
             return true

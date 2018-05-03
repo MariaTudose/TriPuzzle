@@ -37,9 +37,7 @@ object TriPuzzle extends JFXApp {
         scene = new Scene {
             fill = bg
             content = new Pane {
-
                 startGame(children)
-
             }
         }
     }
@@ -74,10 +72,11 @@ object TriPuzzle extends JFXApp {
         var boardPolygons = new ArrayBuffer[(Polygon, (Int, Int), Int)]()
         var trianglePieces = new ArrayBuffer[(Group, Piece)]()
 
+        // The key represents the board coordinates. For each key, both a board triangle and a triangle piece is drawn.
         for ((key, piece) <- pieceMap) {
-            val x = piece.currentCoord._1 
+            val x = piece.currentCoord._1
             val y = piece.currentCoord._2
-            
+
             val xBoard = key._1 * 37.5
             val yBoard = key._2 * 65 + 50
 
@@ -102,6 +101,7 @@ object TriPuzzle extends JFXApp {
             val labelB = new scalafx.scene.control.Label(piece.b)
             labelB.layoutX = x + 33
 
+            // Triangles pointing up are positioned differently than those pointing down.
             if (piece.orientation == 1) {
                 trianglePiece.getPoints.addAll(x, y + 65.0, x + 37.5, y, x + 75.0, y + 65.0)
                 triangleBoard.getPoints.addAll(xBoard, yBoard + 65.0, xBoard + 37.5, yBoard, xBoard + 75.0, yBoard + 65.0)
@@ -122,7 +122,7 @@ object TriPuzzle extends JFXApp {
                         labelA.text = labelB.getText
                         labelB.text = labelC.getText
                         labelC.text = temp
-                        
+                        piece.rotate()
                     }
                 }
             }
@@ -151,6 +151,8 @@ object TriPuzzle extends JFXApp {
             children.addAll(triangleBoard, g)
 
         }
+
+        // Snapping a piece into place.
         for ((group, piece) <- trianglePieces) {
             group.toFront()
             group.onMouseReleased = new EventHandler[MouseEvent] {
@@ -163,6 +165,7 @@ object TriPuzzle extends JFXApp {
                             val pieceX = group.localToScene(group.getBoundsInLocal).minX
                             val pieceY = group.localToScene(group.getBoundsInLocal).maxY
 
+                            // Pieces pointing up should not snap into grid pointing down.
                             if (piece.orientation == 1 && boardOrientation == 1) {
                                 group.setLayoutX(group.getLayoutX + (boardPiece.points(0) - pieceX - 2))
                                 group.setLayoutY(group.getLayoutY + (boardPiece.points(1) - pieceY + 2))
@@ -174,7 +177,10 @@ object TriPuzzle extends JFXApp {
                                 piece.setPos(key)
                                 piece.setCoord(boardPiece.points(0), boardPiece.points(1))
                             }
+
+                            // Setting the location of the piece on the board.
                             board.setPiece(piece, key)
+
                             if (board.checkIfSolved()) {
                                 val alert = new Alert(AlertType.Information) {
                                     initOwner(stage)
@@ -187,13 +193,11 @@ object TriPuzzle extends JFXApp {
                 }
             }
         }
-        (boardPolygons, trianglePieces)
     }
 
     def saveGame(board: Board, pieceMap: Map[(Int, Int), Piece]) = {
         try {
             val writer = new PrintWriter("save.txt", "UTF-8")
-            //writer.println(pieces.map(x => x.currentCoord))
             pieceMap.foreach {
                 case (key, piece) =>
                     writer.print(key._1 + "," + key._2 + ",")
